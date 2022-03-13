@@ -135,13 +135,13 @@ module Canvas
     end
     
     # Semi-hack so I can write better specs
-    def get_request(endpoint)
-      Typhoeus::Request.new(@uri.to_s, method: :get)
+    def get_request(endpoint,timeout)
+      Typhoeus::Request.new(@uri.to_s, method: :get,timeout:timeout)
     end
   
-    def get(endpoint, params=nil)
+    def get(endpoint, params=nil,timeout=nil)
       generate_uri(endpoint, params)
-      request = get_request(endpoint)
+      request = get_request(endpoint,timeout)
       retrieve_response(request)
     end
 
