@@ -84,8 +84,7 @@ module Canvas
     def generate_uri(endpoint, params=nil)
       validate_call(endpoint)
       unless @token == "ignore"
-        endpoint += (endpoint.match(/\?/) ? "&" : "?") + "access_token=" + @token
-        endpoint += "&as_user_id=" + @as_user_id.to_s if @as_user_id
+        endpoint += (endpoint.match(/\?/) ? "&" : "?") + "as_user_id=" + @as_user_id.to_s if @as_user_id
       end
       (params || {}).each do |key, value|
         if value.is_a?(Array)
@@ -108,6 +107,9 @@ module Canvas
       if @insecure
         request.options[:ssl_verifypeer] = false
       end
+
+      add_access_token(request)
+
       begin
         response = request.run
         raise ApiError.new("request timed out") if response.timed_out?
@@ -137,6 +139,10 @@ module Canvas
     # Semi-hack so I can write better specs
     def get_request(endpoint,timeout)
       Typhoeus::Request.new(@uri.to_s, method: :get,timeout:timeout)
+    end
+ 
+    def add_access_token(request)
+      request.options[:headers]['Authorization'] = "Bearer #{@token}"
     end
   
     def get(endpoint, params=nil,timeout=nil)

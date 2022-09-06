@@ -26,15 +26,15 @@ describe "GET requests" do
   end
   
   context "generate_uri" do
-    it "should correctly append the access token" do
+    it "does not have access_token" do
       token_api
-      @api.generate_uri("/api/v1/bacon").to_s.should == "http://canvas.example.com/api/v1/bacon?access_token=#{@api.token}"
+      @api.generate_uri("/api/v1/bacon").to_s.should == "http://canvas.example.com/api/v1/bacon"
     end
     
     it "should correctly append masquerading id if any set" do
       token_api
       @api.masquerade_as(123)
-      @api.generate_uri("/api/v1/bacon?a=1").to_s.should == "http://canvas.example.com/api/v1/bacon?a=1&access_token=#{@api.token}&as_user_id=123"
+      @api.generate_uri("/api/v1/bacon?a=1").to_s.should == "http://canvas.example.com/api/v1/bacon?a=1&as_user_id=123"
     end
     
     it "should generate a valid http object" do
@@ -115,7 +115,7 @@ describe "GET requests" do
     
     it "should append query parameters if specified" do
       token_api
-      @api.generate_uri("/api/v1/bacon?c=x", {'a' => '1', 'b' => '2'}).request_uri.should == "/api/v1/bacon?c=x&access_token=#{@api.token}&a=1&b=2"
+      @api.generate_uri("/api/v1/bacon?c=x", {'a' => '1', 'b' => '2'}).request_uri.should == "/api/v1/bacon?c=x&a=1&b=2"
       @api.should_receive(:generate_uri).with('/api/v1/bob', {'a' => 1})
       @api.should_receive(:get_request).and_raise("stop here")
       expect { @api.get("/api/v1/bob", {'a' => 1}) }.to raise_error("stop here")
@@ -123,18 +123,18 @@ describe "GET requests" do
     
     it "should handle numerical query parameters" do
       token_api
-      @api.generate_uri("/api/v1/bacon", {'a' => 1, 'b' => 2, 'c' => @api}).request_uri.should == "/api/v1/bacon?access_token=#{@api.token}&a=1&b=2&c=#{CGI.escape(@api.to_s)}"
+      @api.generate_uri("/api/v1/bacon", {'a' => 1, 'b' => 2, 'c' => @api}).request_uri.should == "/api/v1/bacon?a=1&b=2&c=#{CGI.escape(@api.to_s)}"
     end
     
     it "should handle array query parameters, with or without the []" do
       token_api
-      @api.generate_uri("/api/v1/bacon", {'a[]' => 1, 'b' => [2,3]}).request_uri.should == "/api/v1/bacon?access_token=#{@api.token}&a%5B%5D=1&b%5B%5D=2&b%5B%5D=3"
-      @api.generate_uri("/api/v1/bacon", [['a[]', 1], ['b', [2,3]]]).request_uri.should == "/api/v1/bacon?access_token=#{@api.token}&a%5B%5D=1&b%5B%5D=2&b%5B%5D=3"
+      @api.generate_uri("/api/v1/bacon", {'a[]' => 1, 'b' => [2,3]}).request_uri.should == "/api/v1/bacon?a%5B%5D=1&b%5B%5D=2&b%5B%5D=3"
+      @api.generate_uri("/api/v1/bacon", [['a[]', 1], ['b', [2,3]]]).request_uri.should == "/api/v1/bacon?a%5B%5D=1&b%5B%5D=2&b%5B%5D=3"
     end
     
     it "should not fail on no query parameters argument" do
       token_api
-      @api.generate_uri("/api/v1/bacon").request_uri.should == "/api/v1/bacon?access_token=#{@api.token}"
+      @api.generate_uri("/api/v1/bacon").request_uri.should == "/api/v1/bacon"
     end
   end
 end
