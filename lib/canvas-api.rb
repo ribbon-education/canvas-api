@@ -103,7 +103,7 @@ module Canvas
     end
   
     def retrieve_response(request)
-      request.options[:headers]['User-Agent'] = "CanvasAPI Ruby"
+      request.options[:headers]['User-Agent'] = ENV.fetch("CANVAS_API_USER_AGENT", "CanvasAPI Ruby")
       if @insecure
         request.options[:ssl_verifypeer] = false
       end
